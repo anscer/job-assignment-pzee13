@@ -74,3 +74,61 @@ export const deleteState = async (req: Request, res: Response) => {
         }
     }
 };
+
+
+
+  
+
+
+export const getStateSummary = async (req: Request, res: Response) => {
+    try {
+      const summary = await StateModel.aggregate([
+        {
+          $project: {
+            year: { $year: "$createdAt" },
+            month: { $month: "$createdAt" },
+            day: { $dayOfMonth: "$createdAt" },
+            hour: { $hour: "$createdAt" },
+            status: "$status",
+          },
+        },
+        {
+          $facet: {
+            byHour: [
+              {
+                $group: {
+                  _id: { year: "$year", month: "$month", day: "$day", hour: "$hour", status: "$status" },
+                  count: { $sum: 1 },
+                },
+              },
+            ],
+            byDay: [
+              {
+                $group: {
+                  _id: { year: "$year", month: "$month", day: "$day", status: "$status" },
+                  count: { $sum: 1 },
+                },
+              },
+            ],
+            byMonth: [
+              {
+                $group: {
+                  _id: { year: "$year", month: "$month", status: "$status" },
+                  count: { $sum: 1 },
+                },
+              },
+            ],
+          },
+        },
+      ]);
+  
+      res.status(200).json(summary);
+    } catch (error) {
+      console.error('Error in getStateSummary:', error);
+      if (error instanceof Error) {
+        res.status(500).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: 'An unknown error occurred' });
+      }
+    }
+  };

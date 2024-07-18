@@ -5,7 +5,6 @@ import cookieParser from "cookie-parser";
 import stateRoutes from '../routes/stateRoutes';
 import userRoutes from '../routes/userRoutes';
 import connectDB from './database';
-import '../middleware/passport';
 import dotenv from 'dotenv';
 dotenv.config();
 
